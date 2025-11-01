@@ -5,6 +5,8 @@
 This project modernizes a legacy IVR system built on VoiceXML (VXML)  by integrating it with modern Conversational AI platforms (ACS/BAP).  
 It enables natural, voice-driven user interactions while reusing existing IVR assets — reducing redevelopment effort and improving user experience.
 
+While the original project statement references Azure Communication Services (ACS) and Business Application Platform (BAP), this implementation uses Twilio Voice API to perform those same communication and voice functions — allowing real-time, speech-based interaction between callers and an AI-enabled backend.
+
 ---
 
 ##  Project Objectives
