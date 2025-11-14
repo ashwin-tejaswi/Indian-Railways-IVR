@@ -92,7 +92,6 @@ Introduce **natural language conversation** into the IVR system through AI-power
 - Speech recognition via Twilio (`SpeechResult`)
 - Intent detection (`INTENT_KEYWORDS`)
 - Context-aware responses via `next_step()`
-- Support for both speech and DTMF inputs
 - Optional integration with AI (e.g., Azure Language, OpenAI GPT)
 
 ###  Flow Summary
@@ -115,4 +114,78 @@ A simple web console for initiating outbound calls via the backend.
 - Displays call status and Twilio SID in browser
 
 ---
+## Module 4 — Testing & Validation
 
+Objective:
+Ensure the IVR backend behaves correctly across unit, integration, end-to-end, error handling, and load testing.
+
+## Test Categories:
+
+Unit Tests (unit_test.py)
+
+Intent detection: book_ticket, check_pnr, cancel_ticket, unknown input
+
+Context-based next step responses
+
+Session management validation
+
+Integration Tests (integration_test.py)
+
+/voice endpoint returns <Say>
+
+/conversation handles booking and PNR queries
+
+/call/end clears session context
+
+End-to-End (E2E) Tests (e2e_tests.py)
+
+Simulates full call flow: voice → booking → class selection → thank you → call end
+
+Error Handling Tests (errorhandling_Test.py)
+
+Missing input
+
+Invalid endpoints
+
+Missing call parameters
+
+Load Testing (load_test.py)
+
+Simulates multiple users calling the IVR concurrently
+
+Uses Locust to stress test /voice and /conversation endpoints
+
+Validation Results:
+All tests passed successfully, confirming backend correctness, session handling, and conversation logic.
+
+Reference Files:
+
+unit_test.py
+
+integration_test.py
+
+e2e_tests.py
+
+errorhandling_Test.py
+
+load_test.py
+
+How to Run Tests
+# Unit, Integration, E2E, Error Handling
+pytest tests/
+
+# Load Testing
+locust -f tests/load_test.py
+
+
+Note: Load testing requires the backend to be running at the specified URL.
+
+## Project Outcome
+
+Modernized legacy IVR with conversational AI
+
+Fully tested backend with unit, integration, E2E, error handling, and load tests
+
+Session-aware, context-sensitive IVR interactions
+
+Ready for production deployment and future AI platform integration
