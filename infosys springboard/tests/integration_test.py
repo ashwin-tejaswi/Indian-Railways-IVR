@@ -1,7 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from ivr_backend import app, session_context  # Changed import from main to ivr_backend
-
+from ivr_backend import app, session_context 
 client = TestClient(app)
 
 def test_voice_entrypoint():
