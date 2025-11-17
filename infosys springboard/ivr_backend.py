@@ -1,5 +1,4 @@
 # AI Enabled Conversational IVR Modernization Framework
-
 # Indian Railways IVR Backend (FastAPI + Twilio + Conversational AI)
 
 from fastapi import FastAPI, Request, Response, Body
@@ -295,4 +294,3 @@ async def call_end(request: Request):
     session_context.pop(call_id, None)
     logger.info(f"Call ended and context cleared for {call_id}")
     return Response(status_code=200)
-
