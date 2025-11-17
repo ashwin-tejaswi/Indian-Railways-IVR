@@ -1,6 +1,5 @@
 # AI Enabled Conversational IVR Modernization Framework
 
-
 # Indian Railways IVR Backend (FastAPI + Twilio + Conversational AI)
 
 from fastapi import FastAPI, Request, Response, Body
@@ -9,7 +8,6 @@ from twilio.twiml.voice_response import VoiceResponse
 from twilio.rest import Client
 import os, re, logging
 from dotenv import load_dotenv
-
 
 # Load environment variables from .env
 load_dotenv()
@@ -39,10 +37,9 @@ app.add_middleware(
 
 # ============================================================
 # Logging
-# ===============================================================
+# ============================================================
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ivr")
-
 
 # ============================================================
 # Regex-based Intent Recognition (Enhanced NLU)
@@ -50,6 +47,7 @@ logger = logging.getLogger("ivr")
 def detect_intent_regex(text: str) -> str:
     text = text.lower()
 
+    # DTMF Inputs
     if text == "1": return "book_ticket"
     if text == "2": return "check_pnr"
     if text == "3": return "cancel_ticket"
@@ -60,6 +58,7 @@ def detect_intent_regex(text: str) -> str:
     if text == "8": return "train_live_status"
     if text == "9": return "platform_locator"
 
+    # Speech Patterns
     if re.search(r"\blive status|running status|where is train\b", text):
         return "train_live_status"
     if re.search(r"\bplatform|which platform\b", text):
@@ -92,7 +91,7 @@ session_context = {}
 # Contextual Dialogue & Follow-Up Logic
 # ============================================================
 def next_step(call_id: str, user_text: str):
-     """
+    """
     Handles follow-up conversation based on previous intent and keeps the call active.
     """
 
@@ -100,14 +99,14 @@ def next_step(call_id: str, user_text: str):
     context = session_context.get(call_id, {"last_intent": None})
     last_intent = context.get("last_intent")
 
- # Detect if user wants to end the conversation
+    # Detect if user wants to end the conversation
     if re.search(r"\b(thank you|thanks|bye|no)\b", user_text):
         resp = VoiceResponse()
         resp.say("Thank you for using Indian Railways helpline. Have a great journey ahead!")
         resp.hangup()
         return Response(content=str(resp), media_type="application/xml")
 
-# Continue existing booking or enquiry
+    # Continue existing booking or enquiry
     if last_intent == "book_ticket":
         if "ac" in user_text:
             response_text = "A C class selected. Please confirm your travel date."
@@ -115,7 +114,11 @@ def next_step(call_id: str, user_text: str):
         elif "sleeper" in user_text:
             response_text = "Sleeper class selected. Please confirm your travel date."
             context["booking_class"] = "Sleeper"
-        elif "tomorrow" in user_text or "today" in user_text or re.search(r"\d{1,2}\s+\w+", user_text):
+        elif (
+            "tomorrow" in user_text
+            or "today" in user_text
+            or re.search(r"\d{1,2}\s+\w+", user_text)
+        ):
             response_text = f"Booking date {user_text} noted. Your ticket will be processed soon. Would you like anything else?"
             context["booking_date"] = user_text
         else:
@@ -136,10 +139,10 @@ def next_step(call_id: str, user_text: str):
     else:
         response_text = "Sorry, I didn’t understand that. Could you please repeat?"
 
-# Save context
+    # Save context
     session_context[call_id] = context
 
-# Respond and keep the gather open
+    # Respond and keep the gather open
     resp = VoiceResponse()
     gather = resp.gather(
         input="speech dtmf",
@@ -154,10 +157,10 @@ def next_step(call_id: str, user_text: str):
 # Initial Greeting Endpoint
 # ============================================================
 @app.post("/voice")
- """
+async def voice_start(request: Request):
+    """
     Entry point for Twilio call — greets and starts listening for input.
     """
-async def voice_start(request: Request):
 
     resp = VoiceResponse()
 
@@ -185,14 +188,14 @@ async def voice_start(request: Request):
     # If no input received, repeat greeting
     resp.redirect(f"{NGROK_URL}/voice")
     return Response(content=str(resp), media_type="application/xml")
-    
+
 
 # ============================================================
 # Conversational Endpoint (Main IVR Logic)
 # ============================================================
 @app.post("/conversation")
 async def conversation(request: Request):
-     """
+    """
     Handles speech or keypad input during an active call.
     """
 
@@ -205,7 +208,7 @@ async def conversation(request: Request):
     intent = detect_intent_regex(user_text)
     context = session_context.get(call_id, {})
 
-   # Store last intent
+    # Store last intent
     if intent != "unknown":
         context["last_intent"] = intent
         session_context[call_id] = context
@@ -241,11 +244,12 @@ async def conversation(request: Request):
 
     elif intent == "platform_locator":
         resp.say("Please tell me your train number to locate the platform.")
-# If unclear, handle via follow-up
+
+    # If unclear, handle via follow-up
     else:
         return next_step(call_id, user_text)
 
-       # Continue listening after speaking
+    # Continue listening after speaking
     gather = resp.gather(
         input="speech dtmf",
         action=f"{NGROK_URL}/conversation",
@@ -254,7 +258,8 @@ async def conversation(request: Request):
     gather.say("Is there anything else you’d like help with?")
 
     return Response(content=str(resp), media_type="application/xml")
-    
+
+
 # ============================================================
 # Start Outbound Call Endpoint
 # ============================================================
@@ -279,9 +284,10 @@ def start_real_call(payload: dict = Body(...)):
         logger.error(f"Twilio call error: {e}")
         return {"error": str(e)}
 
-# ========================
+
+# ============================================================
 # END CALL CLEANUP
-# ========================
+# ============================================================
 @app.post("/call/end")
 async def call_end(request: Request):
     form = await request.form()
@@ -289,3 +295,4 @@ async def call_end(request: Request):
     session_context.pop(call_id, None)
     logger.info(f"Call ended and context cleared for {call_id}")
     return Response(status_code=200)
+
