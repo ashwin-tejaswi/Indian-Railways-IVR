@@ -58,27 +58,40 @@ def detect_intent_regex(text: str) -> str:
     if text == "9": return "platform_locator"
 
     # Speech Patterns
-    if re.search(r"\blive status|running status|where is train\b", text):
-        return "train_live_status"
-    if re.search(r"\bplatform|which platform\b", text):
-        return "platform_locator"
 
-    if re.search(r"\bcancel|refund\b", text):
+def get_intent(text):
+    text = text.lower()
+
+    if re.search(r"\b(cancel|refund)\b", text):
         return "cancel_ticket"
+
     elif re.search(r"\b(book|reserve|ticket|reservation)\b", text):
         return "book_ticket"
-    elif re.search(r"\bpnr|status\b", text):
+
+    elif re.search(r"\b(pnr|status)\b", text):
         return "check_pnr"
-    elif re.search(r"\bfare|cost|price|how much\b", text):
+
+    elif re.search(r"\b(fare|cost|price|how much)\b", text):
         return "fare_enquiry"
+
     elif re.search(r"\btatkal\b", text):
         return "tatkal_info"
+
     elif re.search(r"\b(agent|operator|representative|customer care)\b", text):
         return "talk_agent"
-    elif re.search(r"\bassistance|help|support\b", text):
+
+    elif re.search(r"\b(assistance|help|support)\b", text):
         return "special_assistance"
+
+    elif re.search(r"\b(live status|running status|where is train)\b", text):
+        return "train_live_status"
+
+    elif re.search(r"\b(platform|which platform)\b", text):
+        return "platform_locator"
+
     else:
         return "unknown"
+
 
 
 # ============================================================
